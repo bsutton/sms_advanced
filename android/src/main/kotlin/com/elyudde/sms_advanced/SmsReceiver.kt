@@ -3,7 +3,7 @@ package com.elyudde.sms_advanced
 import android.Manifest
 import android.annotation.TargetApi
 import android.content.BroadcastReceiver
-import android.content.Context
+import android.content.ContextCompact
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -37,7 +37,9 @@ internal class SmsReceiver(val context: Context, private val binding: ActivityPl
     override fun onListen(arguments: Any?, events: EventSink) {
         receiver = createSmsReceiver(events)
         context
-            .registerReceiver(receiver, IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION))
+            .registerReceiver(receiver
+            , IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION) 
+            , ContextCompat.RECEIVER_EXPORTED)
         sink = events
         permissions.checkAndRequestPermission(permissionsList, Permissions.RECV_SMS_ID_REQ)
     }

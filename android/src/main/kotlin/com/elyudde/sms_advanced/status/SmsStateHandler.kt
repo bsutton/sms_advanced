@@ -3,7 +3,7 @@ package com.elyudde.sms_advanced.status
 import android.Manifest
 import android.annotation.TargetApi
 import android.content.BroadcastReceiver
-import android.content.Context
+import android.content.ContextCompact
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
@@ -40,7 +40,8 @@ class SmsStateHandler(val context: Context, private val binding: ActivityPluginB
     private fun registerDeliveredReceiver() {
         context.registerReceiver(
             smsStateChangeReceiver,
-            IntentFilter("SMS_DELIVERED")
+            IntentFilter("SMS_DELIVERED"), 
+            ContextCompat.RECEIVER_EXPORTED
         )
     }
 
@@ -48,7 +49,8 @@ class SmsStateHandler(val context: Context, private val binding: ActivityPluginB
     private fun registerSentReceiver() {
         context.registerReceiver(
             smsStateChangeReceiver,
-            IntentFilter("SMS_SENT")
+            IntentFilter("SMS_SENT"),
+            ContextCompat.RECEIVER_EXPORTED
         )
     }
 

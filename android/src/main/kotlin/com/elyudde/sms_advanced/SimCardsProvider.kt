@@ -25,20 +25,27 @@ internal class SimCardsHandler(
     private val context: Context,
     private val result: MethodChannel.Result
 ) :
-    RequestPermissionsResultListener {
+ 
+class RequestPermissionsResultListener {
     private val permissionsList = arrayOf(Manifest.permission.READ_PHONE_STATE)
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ): Boolean {
+        Log.d("RequestPermissions", "permissionsList: ${permissionsList.joinToString()}")
+        Log.d("RequestPermissions", "permissions: ${permissions.joinToString()}")
+        Log.d("RequestPermissions", "grantResults: ${grantResults.joinToString()}")
+
         if (requestCode != Permissions.READ_PHONE_STATE) {
             return false
         }
         var isOk = true
-        for (res in grantResults) {
+        for ((index, res) in grantResults.withIndex()) {
             if (res != PackageManager.PERMISSION_GRANTED) {
                 isOk = false
+                Log.d("RequestPermissions", "Permission denied: ${permissions[index]}")
                 break
             }
         }
@@ -46,16 +53,17 @@ internal class SimCardsHandler(
             simCards
             return true
         }
-        result.error("#01", "permission READ_PHONE_STATE denied", null)
+        result.error("#01", "permission READ_PHONE_STATE denied -2 ", null)
         return false
     }
 
     fun handle(permissions: Permissions) {
+        Log.d("RequestPermissions", "permissionsList: ${permissionsList.joinToString()}")
         if (permissions.checkAndRequestPermission(permissionsList, Permissions.READ_PHONE_STATE)) {
             simCards
         }
     }
-
+}
     private val simCards: Unit
         @RequiresApi(Build.VERSION_CODES.M) private get() {
             val simCards = JSONArray()
