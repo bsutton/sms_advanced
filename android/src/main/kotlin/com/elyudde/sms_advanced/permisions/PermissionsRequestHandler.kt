@@ -17,20 +17,21 @@ internal class PermissionsRequestHandler : RequestPermissionsResultListener {
         permissions: Array<String>,
         grantResults: IntArray
     ): Boolean {
-        isRequesting = requests.size > 0
-        if (isRequesting) {
-            requests.poll().execute()
+        if (currentRequest?.id != requestCode) {
+            return false
         }
+        currentRequest = requests.poll()
+        currentRequest?.execute()
         return false
     }
 
     companion object {
         private val requests: Queue<PermissionsRequest> = LinkedBlockingQueue()
-        private var isRequesting = false
+        private var currentRequest: PermissionsRequest? = null
         @TargetApi(Build.VERSION_CODES.M)
         fun requestPermissions(permissionsRequest: PermissionsRequest) {
-            if (!isRequesting) {
-                isRequesting = true
+            if (currentRequest == null) {
+                currentRequest = permissionsRequest
                 permissionsRequest.execute()
             } else {
                 requests.add(permissionsRequest)

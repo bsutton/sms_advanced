@@ -22,9 +22,10 @@ class SmsStateChangeReceiver(private val eventSink: EventSink) : BroadcastReceiv
         try {
             val stateChange = JSONObject()
             stateChange.put("sentId", intent.getIntExtra("sentId", -1))
+            stateChange.put("sessionId", intent.getStringExtra("sessionId"))
             val action = intent.action
             when (action ?: "none") {
-                "SMS_SENT" -> {
+                "${context.packageName}.sms_advanced.SMS_SENT" -> {
                     if (resultCode != Activity.RESULT_OK) {
                         stateChange.put("state", "fail")
                     } else {
@@ -32,7 +33,7 @@ class SmsStateChangeReceiver(private val eventSink: EventSink) : BroadcastReceiv
                     }
                     Log.d("flutter_sms", "Sent result: " + sentResult(resultCode))
                 }
-                "SMS_DELIVERED" -> {
+                "${context.packageName}.sms_advanced.SMS_DELIVERED" -> {
                     stateChange.put("state", "delivered")
                 }
                 else -> {

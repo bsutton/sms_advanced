@@ -40,6 +40,15 @@ class Permissions(private val context: Context, val activity: FlutterFragmentAct
     }
 
     companion object {
+        private var nextOperationRequestCode = 1000
+
+        @Synchronized
+        fun nextRequestCode(): Int {
+            val requestCode = nextOperationRequestCode
+            nextOperationRequestCode = if (requestCode >= 65000) 1000 else requestCode + 1
+            return requestCode
+        }
+
         const val RECV_SMS_ID_REQ = 1
         const val SEND_SMS_ID_REQ = 2
         const val READ_SMS_ID_REQ = 3

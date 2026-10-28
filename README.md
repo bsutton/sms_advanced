@@ -8,7 +8,8 @@ This is an SMS library for Flutter.
 
 ### Installation and Usage
 
-Once you're familiar with Flutter you may install this package adding `sms_advanced` (1.0.1 or higher) to the dependencies list of the `pubspec.yaml` file as follow:
+This fork is published through the OnePub host in this repository's
+`pubspec.yaml`. To select this fork, specify the hosted source explicitly:
 
 ```yaml
 ...
@@ -16,11 +17,19 @@ dependencies:
   flutter:
     sdk: flutter
 
-  sms_advanced: ^1.0.1
+  sms_advanced:
+    hosted:
+      name: sms_advanced
+      url: https://onepub.dev/api/jbbxpsdavu/
+    version: ^1.2.2
 ...
 ```
 
 Then run the command `flutter packages get` on the console.
+
+On web, `sendSms` accepts one phone number as the recipient. Formatting spaces,
+hyphens, and parentheses are removed; URI delimiters and recipient lists are
+rejected.
 
 ## Querying SMS messages
 

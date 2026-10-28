@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -299,8 +300,16 @@ class SmsSender {
   final EventChannel _stateChannel;
   late Map<int, SmsMessage> _sentMessages;
   int _sentId = 0;
+  final String _sessionId = _newSessionId();
   final StreamController<SmsMessage?> _deliveredStreamController =
       StreamController<SmsMessage?>();
+
+  static String _newSessionId() {
+    final random = Random.secure();
+    return List.generate(
+            4, (_) => random.nextInt(1 << 32).toRadixString(16).padLeft(8, '0'))
+        .join();
+  }
 
   factory SmsSender() {
     if (_instance == null) {
@@ -339,6 +348,7 @@ class SmsSender {
     Map map = msg.toMap;
     _sentMessages.putIfAbsent(_sentId, () => msg);
     map['sentId'] = _sentId;
+    map['sessionId'] = _sessionId;
     if (simCard != null) {
       map['subId'] = simCard.slot;
     }
@@ -366,6 +376,9 @@ class SmsSender {
   Stream<SmsMessage?> get onSmsDelivered => _deliveredStreamController.stream;
 
   void _onSmsStateChanged(dynamic stateChange) {
+    if (stateChange is! Map || stateChange['sessionId'] != _sessionId) {
+      return;
+    }
     int? id = stateChange['sentId'];
     if (_sentMessages.containsKey(id)) {
       switch (stateChange['state']) {

@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import com.elyudde.sms_advanced.permisions.Permissions
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -45,18 +47,33 @@ internal class SmsQueryHandler(
     start: Int,
     count: Int,
     threadId: Int,
-    address: String?
+    address: String?,
+    private val requestCode: Int,
+    private val binding: ActivityPluginBinding
 ) :
     RequestPermissionsResultListener {
     private val permissionsList = arrayOf(Manifest.permission.READ_SMS)
+    private var completed = false
     private var start = 0
     private var count = -1
     private var threadId = -1
     private var address: String? = null
     fun handle(permissions: Permissions) {
-        if (permissions.checkAndRequestPermission(permissionsList, Permissions.SEND_SMS_ID_REQ)) {
-            querySms()
+        if (permissions.checkAndRequestPermission(permissionsList, requestCode)) {
+            completeAndQuery()
         }
+    }
+
+    private fun completeAndQuery() {
+        if (completed) {
+            return
+        }
+        completed = true
+        // Flutter iterates a HashSet while dispatching permission results.
+        Handler(Looper.getMainLooper()).post {
+            binding.removeRequestPermissionsResultListener(this)
+        }
+        querySms()
     }
 
     private fun readSms(cursor: Cursor): JSONObject {
@@ -120,22 +137,25 @@ internal class SmsQueryHandler(
         permissions: Array<String>,
         grantResults: IntArray
     ): Boolean {
-        if (requestCode != Permissions.READ_SMS_ID_REQ) {
+        if (requestCode != this.requestCode) {
             return false
         }
-        var isOk = true
-        for (res in grantResults) {
-            if (res != PackageManager.PERMISSION_GRANTED) {
-                isOk = false
-                break
-            }
+        if (completed) {
+            return false
         }
+        val isOk = permissions.contentEquals(permissionsList) &&
+            grantResults.size == permissionsList.size &&
+            grantResults.all { it == PackageManager.PERMISSION_GRANTED }
         if (isOk) {
-            querySms()
-            return true
+            completeAndQuery()
+        } else {
+            completed = true
+            Handler(Looper.getMainLooper()).post {
+                binding.removeRequestPermissionsResultListener(this)
+            }
+            result.error("#01", "permission denied", null)
         }
-        result.error("#01", "permission denied", null)
-        return false
+        return true
     }
 
     init {
@@ -174,7 +194,8 @@ internal class SmsQuery(val context: Context, private val binding: ActivityPlugi
         if (call.hasArgument("address")) {
             address = call.argument<String>("address")
         }
-        val handler = SmsQueryHandler(context, result, request, start, count, threadId, address)
+        val handler = SmsQueryHandler(context, result, request, start, count,
+            threadId, address, Permissions.nextRequestCode(), binding)
         binding.addRequestPermissionsResultListener(handler)
         handler.handle(permissions)
     }

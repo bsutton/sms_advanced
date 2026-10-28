@@ -7,6 +7,8 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'src/sms_recipient.dart';
+
 /// A web implementation of the SmsAdvanced plugin.
 class SmsAdvancedPlugin extends PlatformInterface {
   SmsAdvancedPlugin() : super(token: _token);
@@ -54,7 +56,8 @@ class SmsAdvancedPlugin extends PlatformInterface {
   String get separator => isCupertino() ? "&" : "?";
   Future sendSMS(String address, String body) async {
     final _body = Uri.encodeComponent(body);
-    return launchUrl(Uri.parse('sms:$address${separator}body=$_body'));
+    final recipient = normalizeSmsRecipient(address);
+    return launchUrl(Uri.parse('sms:$recipient${separator}body=$_body'));
   }
 }
 

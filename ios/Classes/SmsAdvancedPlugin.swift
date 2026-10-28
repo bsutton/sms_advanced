@@ -2,13 +2,13 @@ import Flutter
 import UIKit
 import MessageUI
 
-public class SmsAdvancedPlugin: NSObject, FlutterPlugin, UINavigationControllerDelegate, MFMessageComposeViewControllerDelegate {
+public class SwiftSmsAdvancedPlugin: NSObject, FlutterPlugin, UINavigationControllerDelegate, MFMessageComposeViewControllerDelegate {
     var result: FlutterResult?
     var _arguments = [String: Any]()
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "plugins.elyudde.com/sendSMS", binaryMessenger: registrar.messenger())
-    let instance = SmsAdvancedPlugin()
+    let channel = FlutterMethodChannel(name: "plugins.elyudde.com/sendSMS", binaryMessenger: registrar.messenger(), codec: FlutterJSONMethodCodec.sharedInstance())
+    let instance = SwiftSmsAdvancedPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 

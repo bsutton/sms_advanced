@@ -3,7 +3,7 @@ package com.elyudde.sms_advanced
 import android.Manifest
 import android.annotation.TargetApi
 import android.content.BroadcastReceiver
-import android.content.ContextCompact
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -12,6 +12,7 @@ import android.provider.Telephony
 import android.telephony.SmsManager
 import android.telephony.SmsMessage
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.elyudde.sms_advanced.permisions.Permissions
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -35,17 +36,23 @@ internal class SmsReceiver(val context: Context, private val binding: ActivityPl
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     override fun onListen(arguments: Any?, events: EventSink) {
-        receiver = createSmsReceiver(events)
-        context
-            .registerReceiver(receiver
-            , IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION) 
-            , ContextCompat.RECEIVER_EXPORTED)
+        onCancel(null)
+        val newReceiver = createSmsReceiver(events)
+        ContextCompat.registerReceiver(
+            context,
+            newReceiver,
+            IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION),
+            Manifest.permission.BROADCAST_SMS,
+            null,
+            ContextCompat.RECEIVER_EXPORTED
+        )
+        receiver = newReceiver
         sink = events
         permissions.checkAndRequestPermission(permissionsList, Permissions.RECV_SMS_ID_REQ)
     }
 
     override fun onCancel(o: Any?) {
-        context.unregisterReceiver(receiver)
+        receiver?.let { context.unregisterReceiver(it) }
         receiver = null
     }
 

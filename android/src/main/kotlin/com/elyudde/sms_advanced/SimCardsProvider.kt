@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.elyudde.sms_advanced.permisions.Permissions
 import com.elyudde.sms_advanced.telephony.TelephonyManager
@@ -25,8 +26,7 @@ internal class SimCardsHandler(
     private val context: Context,
     private val result: MethodChannel.Result
 ) :
- 
-class RequestPermissionsResultListener {
+    RequestPermissionsResultListener {
     private val permissionsList = arrayOf(Manifest.permission.READ_PHONE_STATE)
 
     override fun onRequestPermissionsResult(
@@ -63,7 +63,7 @@ class RequestPermissionsResultListener {
             simCards
         }
     }
-}
+
     private val simCards: Unit
         @RequiresApi(Build.VERSION_CODES.M) private get() {
             val simCards = JSONArray()

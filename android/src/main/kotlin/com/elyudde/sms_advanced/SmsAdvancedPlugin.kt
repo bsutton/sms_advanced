@@ -77,7 +77,7 @@ class SmsAdvancedPlugin() : FlutterPlugin, ActivityAware {
     sendSmsChannel.setMethodCallHandler(sendSms)
 
     // sms state
-    val smsState = SmsStateHandler(context, binding)
+    val smsState = SmsStateHandler(context)
     smsStatusChannel.setStreamHandler(smsState)
 
     // remove sms
